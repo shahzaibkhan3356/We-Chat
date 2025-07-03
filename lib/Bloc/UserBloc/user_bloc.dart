@@ -1,0 +1,153 @@
+import 'package:chat_app/Bloc/UserBloc/user_event.dart';
+import 'package:chat_app/Bloc/UserBloc/user_state.dart';
+import 'package:chat_app/Data/Models/Usermodel/Usermodel.dart';
+import 'package:chat_app/Presentation/Ui/Home/HomeScreen.dart';
+import 'package:chat_app/Presentation/Widgets/CropImage/CropImage.dart';
+import 'package:chat_app/Repository/FirestoreRepository/FirestoreRepo.dart';
+import 'package:chat_app/Utils/NavigationService/navigation_service.dart';
+import 'package:chat_app/Utils/Snackbar/Snackbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+
+class Userbloc extends Bloc<UserEvent, UserState> {
+  FirestoreRepo firestoreRepo;
+
+  Userbloc(this.firestoreRepo) : super(UserState()) {
+    on<Adduser>(_onAdduser);
+    on<UpdateUser>(_onUpdateUser);
+    on<GetAllUsers>(_getAllUsers);
+    on<UploadProfileImage>(_onUploadImage);
+    on<PickAndCropProfileImage>(_onPickAndCropProfileImage);
+  }
+
+  Future<void> _onAdduser(Adduser event, Emitter<UserState> emit) async {
+    try {
+      emit(state.copyWith(isLoading: true));
+      await firestoreRepo.createUser(event.usermodel);
+      NavigationService.Gofromall(Homescreen());
+      showSnackbar("Profile", "Profile Created Successfully");
+      emit(state.copyWith(isLoading: false));
+    } on FirebaseException catch (e) {
+      emit(state.copyWith(isLoading: false));
+      showSnackbar("Login Error", firestoreRepo.getErrorMessage(e));
+    } on Exception {
+      showSnackbar("Login Error", "Error Getting Users");
+    }
+  }
+
+  Future<void> _onUpdateUser(UpdateUser event, Emitter<UserState> emit) async {
+    try {
+      emit(state.copyWith(isLoading: true));
+      await firestoreRepo.updateUser(event.usermodel);
+      NavigationService.Gofromall(Homescreen());
+      showSnackbar("Profile", "Profile Updated Successfully");
+      emit(state.copyWith(isLoading: false, currentUser: event.usermodel));
+    } on FirebaseException catch (e) {
+      emit(state.copyWith(isLoading: false));
+      showSnackbar("Profile Update Error", firestoreRepo.getErrorMessage(e));
+    } on Exception {
+      showSnackbar("Login Error", "Error Getting Users");
+    }
+  }
+
+  Future<void> _getAllUsers(GetAllUsers event, Emitter<UserState> emit) async {
+    try {
+      emit(state.copyWith(isLoading: true));
+      List<UserModel> users = await firestoreRepo.getAllUsers();
+      emit(state.copyWith(isLoading: false, allUsers: users));
+    } on FirebaseException catch (e) {
+      emit(state.copyWith(isLoading: false));
+      showSnackbar("Error", firestoreRepo.getErrorMessage(e));
+    } on Exception {
+      showSnackbar("Login Error", "Error Getting Users");
+    }
+  }
+
+  Future<void> _onUploadImage(
+    UploadProfileImage event,
+    Emitter<UserState> emit,
+  ) async {
+    try {
+      if (event.Profilepic.isEmpty) return;
+      emit(state.copyWith(isUploadingProfilePic: true));
+      final url = await firestoreRepo.uploadProfilePicture(event.Profilepic);
+      if (url != null) {
+        emit(state.copyWith(profilepic: url, isUploadingProfilePic: false));
+        showSnackbar("Profile", "Profile picture updated!");
+      } else {
+        emit(state.copyWith(isUploadingProfilePic: false));
+        showSnackbar("Error", "Failed to upload profile picture");
+      }
+    } catch (e) {
+      emit(state.copyWith(isUploadingProfilePic: false));
+      showSnackbar("Error", "Failed to upload profile picture");
+    }
+  }
+
+  Future<void> _onPickAndCropProfileImage(
+    PickAndCropProfileImage event,
+    Emitter<UserState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isUploadingProfilePic: true));
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: event.source,
+        imageQuality: 80,
+      );
+      if (pickedFile == null) {
+        emit(state.copyWith(isUploadingProfilePic: false));
+        showSnackbar("Error", "No Image Selected");
+        return;
+      }
+      // Crop
+      final context = NavigationService.navigatorKey.currentContext;
+      if (context == null) {
+        emit(state.copyWith(isUploadingProfilePic: false));
+        showSnackbar("Error", "No context for cropping");
+        return;
+      }
+      final croppedPath = await Navigator.of(context).push<String>(
+        MaterialPageRoute(builder: (_) => CropImage(path: pickedFile.path)),
+      );
+      if (croppedPath == null || croppedPath.isEmpty) {
+        emit(state.copyWith(isUploadingProfilePic: false));
+        showSnackbar("Error", "No Image Selected");
+        return;
+      }
+      emit(
+        state.copyWith(
+          localProfilePicPath: croppedPath,
+          isUploadingProfilePic: true,
+        ),
+      );
+      // Upload
+      final url = await firestoreRepo.uploadProfilePicture(croppedPath);
+      if (url != null) {
+        emit(
+          state.copyWith(
+            profilepic: url,
+            isUploadingProfilePic: false,
+            localProfilePicPath: null,
+          ),
+        );
+        showSnackbar("Profile", "Profile picture updated!");
+      } else {
+        emit(
+          state.copyWith(
+            isUploadingProfilePic: false,
+            localProfilePicPath: null,
+          ),
+        );
+        showSnackbar("Error", "Failed to upload profile picture");
+      }
+    } catch (e) {
+      emit(
+        state.copyWith(isUploadingProfilePic: false, localProfilePicPath: null),
+      );
+      showSnackbar("Error", "Error picking/cropping/uploading image");
+    }
+  }
+}
