@@ -1,9 +1,5 @@
 <!-- We Chat README -->
 
-<p align="center">
-  <img src="assets/logo.png" width="120" alt="We Chat Logo" />
-</p>
-
 <h1 align="center">We Chat 💬</h1>
 <h3 align="center">A modern, encrypted Flutter chat app with a dark-glass UI, built for seamless communication</h3>
 
