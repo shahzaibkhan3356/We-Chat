@@ -5,39 +5,40 @@ class UserState extends Equatable {
   final String errorMessage;
   final List<UserModel> allUsers;
   final UserModel? currentUser;
-  final String profilepic;
+
+  final String? profileImageUrl;        // Final uploaded image URL from Firebase
+  final String? localProfileImagePath;  // Temporary image file path for UI preview
+
   final bool isLoading;
-  final bool isUploadingProfilePic;
-  final String? localProfilePicPath;
+  final bool isUploadingProfileImage;
 
   const UserState({
     this.errorMessage = '',
     this.allUsers = const [],
     this.currentUser,
+    this.profileImageUrl,
+    this.localProfileImagePath,
     this.isLoading = false,
-    this.profilepic = '',
-    this.isUploadingProfilePic = false,
-    this.localProfilePicPath,
+    this.isUploadingProfileImage = false,
   });
 
   UserState copyWith({
     String? errorMessage,
-    String? profilepic,
     List<UserModel>? allUsers,
     UserModel? currentUser,
+    String? profileImageUrl,
+    String? localProfileImagePath,
     bool? isLoading,
-    bool? isUploadingProfilePic,
-    String? localProfilePicPath,
+    bool? isUploadingProfileImage,
   }) {
     return UserState(
       errorMessage: errorMessage ?? this.errorMessage,
       allUsers: allUsers ?? this.allUsers,
       currentUser: currentUser ?? this.currentUser,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      localProfileImagePath: localProfileImagePath ?? this.localProfileImagePath,
       isLoading: isLoading ?? this.isLoading,
-      profilepic: profilepic ?? this.profilepic,
-      isUploadingProfilePic:
-          isUploadingProfilePic ?? this.isUploadingProfilePic,
-      localProfilePicPath: localProfilePicPath ?? this.localProfilePicPath,
+      isUploadingProfileImage: isUploadingProfileImage ?? this.isUploadingProfileImage,
     );
   }
 
@@ -46,9 +47,9 @@ class UserState extends Equatable {
     errorMessage,
     allUsers,
     currentUser,
-    profilepic,
+    profileImageUrl,
+    localProfileImagePath,
     isLoading,
-    isUploadingProfilePic,
-    localProfilePicPath,
+    isUploadingProfileImage,
   ];
 }

@@ -1,15 +1,15 @@
+import 'package:chat_app/Utils/Constants/AppFonts/AppFonts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:chat_app/Utils/Constants/AppFonts/AppFonts.dart';
 
-class RichTextButton extends StatelessWidget {
+class ActionText extends StatelessWidget {
   final String text;
   final String actionText;
   final VoidCallback onTap;
   final TextStyle? textStyle;
   final TextStyle? actionStyle;
 
-  const RichTextButton({
+  const ActionText({
     Key? key,
     required this.text,
     required this.actionText,
@@ -25,18 +25,22 @@ class RichTextButton extends StatelessWidget {
       child: RichText(
         text: TextSpan(
           text: text,
-          style: textStyle ?? AppFonts.body.copyWith(
-            color: Colors.grey,
-            fontSize: Get.width * 0.04,
-          ),
+          style:
+              textStyle ??
+              AppFonts.body.copyWith(
+                color: Colors.grey,
+                fontSize: Get.width * 0.04,
+              ),
           children: [
             TextSpan(
               text: ' $actionText',
-              style: actionStyle ?? AppFonts.body.copyWith(
-                color: Colors.blueAccent,
-                fontWeight: FontWeight.bold,
-                fontSize: Get.width * 0.041,
-              ),
+              style:
+                  actionStyle ??
+                  AppFonts.body.copyWith(
+                    color: Colors.blueAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: Get.width * 0.041,
+                  ),
             ),
           ],
         ),

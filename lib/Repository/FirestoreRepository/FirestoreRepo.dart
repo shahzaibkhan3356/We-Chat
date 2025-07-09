@@ -67,27 +67,23 @@ class FirestoreRepo {
       rethrow;
     }
   }
-
-  Future<String?> uploadProfilePicture(String path) async {
-    print("Started Uploading Image");
-    if (path.isEmpty) return null;
+  Future<String?> uploadProfilePicture(String localFilePath) async {
+    if (localFilePath.isEmpty) return null;
     final user = _auth.currentUser;
     if (user == null) throw Exception("No user logged in");
+
     try {
-      log("Uploading Image .....");
-      File imageFile = File(path);
-      Reference ref = _storage.ref().child('profile_pictures');
-      log(user.uid);
-      UploadTask uploadTask = ref.putFile(imageFile);
+      File file = File(localFilePath);
+      Reference ref = _storage.ref().child('profile_pictures').child(user.uid);
+      UploadTask uploadTask = ref.putFile(file);
       TaskSnapshot snapshot = await uploadTask;
-      String downloadUrl = await snapshot.ref.getDownloadURL();
-      log("Image Url $downloadUrl");
-      return downloadUrl;
+      return await snapshot.ref.getDownloadURL();
     } catch (e) {
-      log('Error picking or uploading profile picture: $e');
+      log('Error uploading profile picture: $e');
       rethrow;
     }
   }
+
 
   Future<void> deleteProfilePicture() async {
     try {

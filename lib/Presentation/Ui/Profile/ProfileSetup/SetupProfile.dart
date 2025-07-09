@@ -1,134 +1,136 @@
-import 'dart:io';
-
-import 'package:chat_app/Bloc/UserBloc/user_bloc.dart';
-import 'package:chat_app/Bloc/UserBloc/user_event.dart';
-import 'package:chat_app/Bloc/UserBloc/user_state.dart';
+import 'package:chat_app/Data/Models/Usermodel/Usermodel.dart';
+import 'package:chat_app/Presentation/Widgets/Buttons/CommonButton.dart';
+import 'package:chat_app/Presentation/Widgets/TextInputWidget/TextInputWidget.dart';
+import 'package:chat_app/Utils/Constants/AppFonts/AppFonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
-import '../../../../Utils/Constants/AppColors/appfonts.dart';
-import '../../../Widgets/Container/GlassContainer.dart';
-import '../../../Widgets/TextInputWidget/TextInputWidget.dart';
+import '../../../../Bloc/UserBloc/user_bloc.dart';
+import '../../../../Bloc/UserBloc/user_event.dart';
+import '../../../../Bloc/UserBloc/user_state.dart';
+import '../../../Widgets/ProfilePicWidget/ProfilePicWidget.dart';
 
-class ProfileSetupScreen extends StatelessWidget {
+class ProfileSetupScreen extends StatefulWidget {
   const ProfileSetupScreen({super.key});
+
+  @override
+  State<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
+}
+
+class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
+  TextEditingController namecontroller = TextEditingController();
+  TextEditingController mobcon = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  TextEditingController biocon = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Center(
-          child: GlassContainer(
-            height: Get.height * 0.8,
-            width: Get.width * 0.85,
-            child: SingleChildScrollView(
-              child: BlocBuilder<Userbloc, UserState>(
-                builder: (context, state) {
-                  final showLoading = state.isUploadingProfilePic;
-                  final avatarImage = state.localProfilePicPath != null
-                      ? FileImage(File(state.localProfilePicPath!))
-                      : (state.profilepic.isNotEmpty
-                            ? NetworkImage(state.profilepic)
-                            : const AssetImage("assets/Images/user.png")
-                                  as ImageProvider);
-                  return Column(
-                    children: [
-                      const SizedBox(height: 20),
-                      Stack(
-                        alignment: Alignment.bottomRight,
-                        children: [
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              CircleAvatar(
-                                radius: 55,
-                                backgroundColor: Colors.grey[800],
-                                backgroundImage: avatarImage,
-                              ),
-                              if (showLoading)
-                                const SizedBox(
-                                  width: 110,
-                                  height: 110,
-                                  child: Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 3,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.accent,
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.edit,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                context.read<Userbloc>().add(
-                                  PickAndCropProfileImage(
-                                    source: ImageSource.gallery,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 30),
-
-                      AuthTextField(
-                        label: "Your Name",
-                        hintText: "Enter your full name",
-                        controller: TextEditingController(),
-                        prefixIcon: Icons.person,
-                        validator: (value) {
-                          if (value == null || value.isEmpty)
-                            return "Name is required";
-                          return null;
-                        },
-                        focusNode: FocusNode(),
-                      ),
-                      const SizedBox(height: 20),
-
-                      AuthTextField(
-                        focusNode: FocusNode(),
-                        label: "Mobile Number",
-                        hintText: "Enter your mobile number",
-                        controller: TextEditingController(),
-                        keyboardType: TextInputType.phone,
-                        prefixIcon: Icons.phone,
-                        validator: (value) {
-                          if (value == null || value.isEmpty)
-                            return "Mobile number is required";
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      AuthTextField(
-                        focusNode: FocusNode(),
-                        label: "Bio",
-                        hintText: "Tell us something about yourself",
-                        controller: TextEditingController(),
-                        keyboardType: TextInputType.multiline,
-                        prefixIcon: Icons.info_outline,
-                        validator: (value) => null,
-                      ),
-                      const SizedBox(height: 30),
-
-                      const SizedBox(height: 20),
-                    ],
-                  );
-                },
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        titleTextStyle: AppFonts.headingLarge,
+        title: Text("Profile"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              ProfileImagePicker(),
+              Gap(Get.height * 0.01),
+              Text(
+                "Upload Profile Picture",
+                style: AppFonts.headingSmall.copyWith(fontSize: 17),
               ),
-            ),
+              Gap(Get.height * 0.02),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Form(
+                      key: _formKey,
+                      child: BlocBuilder<UserBloc, UserState>(
+                        builder: (context, state) {
+                          return Column(
+                            children: [
+                              InputFields(
+                                label: "Name",
+                                hintText: "Enter Your Name",
+                                controller: namecontroller,
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Name is required';
+                                  }
+                                },
+                              ),
+                              Gap(Get.height * 0.02),
+                              InputFields(
+                                label: "Mobile Number",
+                                hintText: "Enter Your Mobile Number",
+                                controller: mobcon,
+                                keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Mobile Number is required';
+                                  }
+                                },
+                              ),
+                              Gap(Get.height * 0.02),
+                              InputFields(
+                                label: "Bio",
+                                hintText: "Tell us Something About You",
+                                controller: biocon,
+                                textInputAction: TextInputAction.done,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Bio is required';
+                                  }
+                                },
+                              ),
+                              Gap(Get.height * 0.03),
+                              CustomButton(
+                                title: "Continue",
+                                ontap: () {
+                                  FocusScope.of(context).unfocus();
+                                  if (_formKey.currentState!.validate()) {
+                                    FirebaseAuth auth = FirebaseAuth.instance;
+                                    if (auth.currentUser != null) {
+                                      User currentuser = auth.currentUser!;
+                                      String email = currentuser.email!;
+                                      String uid = currentuser.uid;
+                                      context.read<UserBloc>().add(
+                                        AddUser(
+                                          userModel: UserModel(
+                                            profilePic: state.profileImageUrl!,
+                                            uid: uid,
+                                            email: email,
+                                            number: mobcon.text.trim(),
+                                            bio: biocon.text.trim(),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                isloading: state.isLoading,
+                              ),
+                              Gap(Get.height * 0.025),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

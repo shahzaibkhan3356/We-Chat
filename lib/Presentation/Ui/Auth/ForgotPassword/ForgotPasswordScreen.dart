@@ -1,15 +1,13 @@
 import 'package:chat_app/Bloc/AuthBloc/auth_bloc.dart';
 import 'package:chat_app/Bloc/AuthBloc/auth_event.dart';
 import 'package:chat_app/Bloc/AuthBloc/auth_state.dart';
-import 'package:chat_app/Presentation/Ui/Auth/Signup/SignupScreen.dart';
 import 'package:chat_app/Presentation/Widgets/Buttons/TextButton.dart';
-import 'package:chat_app/Utils/NavigationService/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
-import '../../../../Utils/Constants/AppColors/appfonts.dart';
+import '../../../../Utils/Constants/AppColors/Appcolors.dart';
 import '../../../../Utils/Constants/AppFonts/AppFonts.dart';
 import '../../../Widgets/Buttons/CommonButton.dart';
 import '../../../Widgets/Container/GlassContainer.dart';
@@ -43,7 +41,7 @@ class Forgotpasswordscreen extends StatelessWidget {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 30),
-                      AuthTextField(
+                      InputFields(
                         focusNode: focusNode,
                         label: "Email",
                         hintText: "you@email.com",
@@ -65,7 +63,7 @@ class Forgotpasswordscreen extends StatelessWidget {
                         },
                       ),
                       const SizedBox(height: 20),
-                      AuthButton(
+                      CustomButton(
                         title: "Reset Password",
                         isloading: state.isloading,
                         ontap: () {
@@ -81,11 +79,11 @@ class Forgotpasswordscreen extends StatelessWidget {
                       ),
                       Gap(10),
                       Center(
-                        child: RichTextButton(
+                        child: ActionText(
                           text: "Go Back To",
                           actionText: "Login",
                           onTap: () {
-                            NavigationService.goto(SignupScreen());
+                            // NavigationService.goto(SignupScreen());
                           },
                         ),
                       ),

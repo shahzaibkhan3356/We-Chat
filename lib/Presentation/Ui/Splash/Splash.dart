@@ -1,14 +1,13 @@
 import 'dart:ui';
 
-import 'package:chat_app/Presentation/Ui/Auth/Login/LoginScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
-import '../../../Utils/Constants/AppColors/appfonts.dart';
+import '../../../Utils/Constants/AppColors/Appcolors.dart';
 import '../../../Utils/Constants/AppFonts/AppFonts.dart';
-import '../../../Utils/NavigationService/navigation_service.dart';
+import '../../../services/SplashService/SplashService.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,8 +17,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
-
   @override
   void initState() {
     super.initState();
@@ -32,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: AppColors.background,
       body: SingleChildScrollView(
         child: Padding(
-          padding:  EdgeInsets.only(top: Get.height*0.1),
+          padding: EdgeInsets.only(top: Get.height * 0.1),
           child: Center(
             child: Stack(
               children: [
@@ -46,10 +43,9 @@ class _SplashScreenState extends State<SplashScreen> {
                         filterQuality: FilterQuality.high,
                         frameRate: FrameRate(60),
                         onLoaded: (p0) {
-                          Future.delayed(const Duration(seconds: 3), (){
-                            NavigationService.Gofromall(LoginScreen());
+                          Future.delayed(const Duration(seconds: 3), () {
+                            SplashService.checkAuthAndProfileStatus();
                           });
-
                         },
                         repeat: true,
                         'assets/animations/Splashanim.json',
@@ -77,7 +73,6 @@ class _SplashScreenState extends State<SplashScreen> {
                         // },
                         repeat: true,
                         'assets/animations/loadinganim.json',
-
                       ),
                     ],
                   ),

@@ -1,153 +1,101 @@
+import 'package:bloc/bloc.dart';
 import 'package:chat_app/Bloc/UserBloc/user_event.dart';
 import 'package:chat_app/Bloc/UserBloc/user_state.dart';
-import 'package:chat_app/Data/Models/Usermodel/Usermodel.dart';
-import 'package:chat_app/Presentation/Ui/Home/HomeScreen.dart';
-import 'package:chat_app/Presentation/Widgets/CropImage/CropImage.dart';
-import 'package:chat_app/Repository/FirestoreRepository/FirestoreRepo.dart';
-import 'package:chat_app/Utils/NavigationService/navigation_service.dart';
-import 'package:chat_app/Utils/Snackbar/Snackbar.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
-class Userbloc extends Bloc<UserEvent, UserState> {
-  FirestoreRepo firestoreRepo;
+import '../../Repository/FirestoreRepository/FirestoreRepo.dart';
+import '../../Utils/NavigationService/navigation_service.dart';
+import '../../Utils/Snackbar/Snackbar.dart';
+import '../../routes/routes_names.dart';
 
-  Userbloc(this.firestoreRepo) : super(UserState()) {
-    on<Adduser>(_onAdduser);
+class UserBloc extends Bloc<UserEvent, UserState> {
+  final FirestoreRepo firestoreRepo;
+
+  UserBloc(this.firestoreRepo) : super(const UserState()) {
+    on<AddUser>(_onAddUser);
     on<UpdateUser>(_onUpdateUser);
     on<GetAllUsers>(_getAllUsers);
-    on<UploadProfileImage>(_onUploadImage);
-    on<PickAndCropProfileImage>(_onPickAndCropProfileImage);
+    on<PickAndUploadProfileImage>(_onPickAndUploadImage);
   }
 
-  Future<void> _onAdduser(Adduser event, Emitter<UserState> emit) async {
+  Future<void> _onAddUser(AddUser event, Emitter<UserState> emit) async {
+    emit(state.copyWith(isLoading: true));
     try {
-      emit(state.copyWith(isLoading: true));
-      await firestoreRepo.createUser(event.usermodel);
-      NavigationService.Gofromall(Homescreen());
+      await firestoreRepo.createUser(event.userModel);
+      NavigationService.Gofromall(AppRoutes.home);
       showSnackbar("Profile", "Profile Created Successfully");
-      emit(state.copyWith(isLoading: false));
-    } on FirebaseException catch (e) {
-      emit(state.copyWith(isLoading: false));
-      showSnackbar("Login Error", firestoreRepo.getErrorMessage(e));
-    } on Exception {
-      showSnackbar("Login Error", "Error Getting Users");
+      emit(state.copyWith(isLoading: false, currentUser: event.userModel));
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: firestoreRepo.getErrorMessage(e),
+        ),
+      );
     }
   }
 
   Future<void> _onUpdateUser(UpdateUser event, Emitter<UserState> emit) async {
+    emit(state.copyWith(isLoading: true));
     try {
-      emit(state.copyWith(isLoading: true));
-      await firestoreRepo.updateUser(event.usermodel);
-      NavigationService.Gofromall(Homescreen());
+      await firestoreRepo.updateUser(event.userModel);
+      NavigationService.Gofromall(AppRoutes.home);
       showSnackbar("Profile", "Profile Updated Successfully");
-      emit(state.copyWith(isLoading: false, currentUser: event.usermodel));
-    } on FirebaseException catch (e) {
-      emit(state.copyWith(isLoading: false));
-      showSnackbar("Profile Update Error", firestoreRepo.getErrorMessage(e));
-    } on Exception {
-      showSnackbar("Login Error", "Error Getting Users");
+      emit(state.copyWith(isLoading: false, currentUser: event.userModel));
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: firestoreRepo.getErrorMessage(e),
+        ),
+      );
     }
   }
 
   Future<void> _getAllUsers(GetAllUsers event, Emitter<UserState> emit) async {
+    emit(state.copyWith(isLoading: true));
     try {
-      emit(state.copyWith(isLoading: true));
-      List<UserModel> users = await firestoreRepo.getAllUsers();
+      final users = await firestoreRepo.getAllUsers();
       emit(state.copyWith(isLoading: false, allUsers: users));
-    } on FirebaseException catch (e) {
-      emit(state.copyWith(isLoading: false));
-      showSnackbar("Error", firestoreRepo.getErrorMessage(e));
-    } on Exception {
-      showSnackbar("Login Error", "Error Getting Users");
-    }
-  }
-
-  Future<void> _onUploadImage(
-    UploadProfileImage event,
-    Emitter<UserState> emit,
-  ) async {
-    try {
-      if (event.Profilepic.isEmpty) return;
-      emit(state.copyWith(isUploadingProfilePic: true));
-      final url = await firestoreRepo.uploadProfilePicture(event.Profilepic);
-      if (url != null) {
-        emit(state.copyWith(profilepic: url, isUploadingProfilePic: false));
-        showSnackbar("Profile", "Profile picture updated!");
-      } else {
-        emit(state.copyWith(isUploadingProfilePic: false));
-        showSnackbar("Error", "Failed to upload profile picture");
-      }
     } catch (e) {
-      emit(state.copyWith(isUploadingProfilePic: false));
-      showSnackbar("Error", "Failed to upload profile picture");
-    }
-  }
-
-  Future<void> _onPickAndCropProfileImage(
-    PickAndCropProfileImage event,
-    Emitter<UserState> emit,
-  ) async {
-    try {
-      emit(state.copyWith(isUploadingProfilePic: true));
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(
-        source: event.source,
-        imageQuality: 80,
-      );
-      if (pickedFile == null) {
-        emit(state.copyWith(isUploadingProfilePic: false));
-        showSnackbar("Error", "No Image Selected");
-        return;
-      }
-      // Crop
-      final context = NavigationService.navigatorKey.currentContext;
-      if (context == null) {
-        emit(state.copyWith(isUploadingProfilePic: false));
-        showSnackbar("Error", "No context for cropping");
-        return;
-      }
-      final croppedPath = await Navigator.of(context).push<String>(
-        MaterialPageRoute(builder: (_) => CropImage(path: pickedFile.path)),
-      );
-      if (croppedPath == null || croppedPath.isEmpty) {
-        emit(state.copyWith(isUploadingProfilePic: false));
-        showSnackbar("Error", "No Image Selected");
-        return;
-      }
       emit(
         state.copyWith(
-          localProfilePicPath: croppedPath,
-          isUploadingProfilePic: true,
+          isLoading: false,
+          errorMessage: firestoreRepo.getErrorMessage(e),
         ),
       );
-      // Upload
-      final url = await firestoreRepo.uploadProfilePicture(croppedPath);
-      if (url != null) {
-        emit(
-          state.copyWith(
-            profilepic: url,
-            isUploadingProfilePic: false,
-            localProfilePicPath: null,
-          ),
-        );
-        showSnackbar("Profile", "Profile picture updated!");
-      } else {
-        emit(
-          state.copyWith(
-            isUploadingProfilePic: false,
-            localProfilePicPath: null,
-          ),
-        );
-        showSnackbar("Error", "Failed to upload profile picture");
-      }
-    } catch (e) {
-      emit(
-        state.copyWith(isUploadingProfilePic: false, localProfilePicPath: null),
+    }
+  }
+
+  Future<void> _onPickAndUploadImage(
+    PickAndUploadProfileImage event,
+    Emitter<UserState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isUploadingProfileImage: true));
+
+      final pickedFile = await ImagePicker().pickImage(
+        source: event.source,
+        imageQuality: 50,
       );
-      showSnackbar("Error", "Error picking/cropping/uploading image");
+      if (pickedFile == null) {
+        emit(state.copyWith(isUploadingProfileImage: false));
+        return;
+      }
+
+      emit(state.copyWith(localProfileImagePath: pickedFile.path));
+
+      final imageUrl = await firestoreRepo.uploadProfilePicture(
+        pickedFile.path,
+      );
+      if (imageUrl != null) {
+        emit(state.copyWith(profileImageUrl: imageUrl));
+      }
+
+      emit(state.copyWith(isUploadingProfileImage: false));
+    } catch (e) {
+      emit(state.copyWith(isUploadingProfileImage: false));
+      showSnackbar("Image Upload", "Failed to upload image");
     }
   }
 }

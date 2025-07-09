@@ -4,24 +4,22 @@ import 'package:get/get.dart';
 class NavigationService {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
-  static const Transition _transition = Transition.fade;
-
-  static void goto(Widget Screen) {
+  static void goto(String routename) {
     FocusManager.instance.primaryFocus?.unfocus();
-    Get.to(Screen, transition: _transition);
+    Get.toNamed(routename);
   }
 
-  static void Gofrom(Widget Screen) {
+  static void Gofrom(String routename) {
     FocusManager.instance.primaryFocus?.unfocus();
-    Get.off(Screen, transition: _transition);
+    Get.offNamed(routename);
   }
 
-  static void Gofromall(Widget Screen) {
+  static void Gofromall(String routename) {
     FocusManager.instance.primaryFocus?.unfocus();
-    Get.offAll(Screen, transition: _transition);
+    Get.offAllNamed(routename);
   }
 
-  static void Goback(Widget Screen) {
+  static void Goback() {
     FocusManager.instance.primaryFocus?.unfocus();
     Get.back();
   }

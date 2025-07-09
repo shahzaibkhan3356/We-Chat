@@ -1,6 +1,7 @@
 class UserModel {
   final String uid;
   final String email;
+  final String statusurl;
   final String number;
   final String bio;
   final String profilePic;
@@ -11,11 +12,13 @@ class UserModel {
     required this.number,
     this.bio = '',
     this.profilePic = '',
+    this.statusurl=''
   });
 
   // Convert AppUser to a map for Firestore
   Map<String, dynamic> toMap() {
     return {
+      'statusurl':statusurl,
       'uid': uid,
       'email': email,
       'number': number,
@@ -32,6 +35,7 @@ class UserModel {
       number: map['number'] ?? '',
       bio: map['bio'] ?? '',
       profilePic: map['profilePic'] ?? '',
+      statusurl: map['statusurl'] ?? '',
     );
   }
 }
