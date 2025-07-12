@@ -1,8 +1,8 @@
 import 'package:chat_app/Bloc/AuthBloc/auth_event.dart';
 import 'package:chat_app/Bloc/AuthBloc/auth_state.dart';
 import 'package:chat_app/Repository/AuthRepository/AuthRepository.dart';
+import 'package:chat_app/Routes/route_names/routenames.dart';
 import 'package:chat_app/Utils/Snackbar/Snackbar.dart';
-import 'package:chat_app/routes/routes_names.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,7 +23,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLoginWithEmail(
-      Loginwithemail event, Emitter<AuthState> emit) async {
+    Loginwithemail event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(state.copyWith(isloading: true, loginState: LoginState.Loading));
 
     try {
@@ -36,15 +38,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final message = authRepo.getAuthErrorMessage(e.code);
       showSnackbar("Login Error", message);
       emit(state.copyWith(isloading: false, loginState: LoginState.Failed));
-    }
-    catch (e) {
+    } catch (e) {
       showSnackbar("Login Error", e.toString());
       emit(state.copyWith(isloading: false, loginState: LoginState.Failed));
     }
   }
 
   Future<void> _onSignupWithEmail(
-      Signupwithemail event, Emitter<AuthState> emit) async {
+    Signupwithemail event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(state.copyWith(isloading: true, loginState: LoginState.Loading));
 
     try {
@@ -64,13 +67,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onResetPassword(
-      ResetPassword event, Emitter<AuthState> emit) async {
+    ResetPassword event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(state.copyWith(isloading: true, loginState: LoginState.Loading));
 
     try {
       await authRepo.resetPassword(event.email);
       showSnackbar(
-          "Reset Password", "Check your email to reset your password.");
+        "Reset Password",
+        "Check your email to reset your password.",
+      );
       emit(state.copyWith(isloading: false, loginState: LoginState.Success));
     } on FirebaseAuthException catch (e) {
       final message = authRepo.getAuthErrorMessage(e.code);

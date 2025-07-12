@@ -1,12 +1,12 @@
 import 'package:bloc/bloc.dart';
 import 'package:chat_app/Bloc/UserBloc/user_event.dart';
 import 'package:chat_app/Bloc/UserBloc/user_state.dart';
+import 'package:chat_app/Routes/route_names/routenames.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../Repository/FirestoreRepository/FirestoreRepo.dart';
 import '../../Utils/NavigationService/navigation_service.dart';
 import '../../Utils/Snackbar/Snackbar.dart';
-import '../../routes/routes_names.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
   final FirestoreRepo firestoreRepo;
