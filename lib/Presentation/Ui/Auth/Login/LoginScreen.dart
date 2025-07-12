@@ -2,11 +2,13 @@ import 'package:chat_app/Bloc/AuthBloc/auth_bloc.dart';
 import 'package:chat_app/Bloc/AuthBloc/auth_event.dart';
 import 'package:chat_app/Bloc/AuthBloc/auth_state.dart';
 import 'package:chat_app/Presentation/Widgets/Buttons/CommonButton.dart';
+import 'package:chat_app/Presentation/Widgets/Buttons/Googlebutton.dart';
 import 'package:chat_app/Presentation/Widgets/Buttons/TextButton.dart';
 import 'package:chat_app/Presentation/Widgets/TextInputWidget/TextInputWidget.dart';
 import 'package:chat_app/Routes/route_names/routenames.dart';
 import 'package:chat_app/Utils/Constants/AppFonts/AppFonts.dart';
 import 'package:chat_app/Utils/NavigationService/navigation_service.dart';
+import 'package:chat_app/services/SplashService/SplashService.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -41,7 +43,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    rootBundle.load('assets/animations/animated_login.riv').then((data) {
+    rootBundle.load('assets/animations/animated_login_character.riv').then((
+      data,
+    ) {
       final file = RiveFile.import(data);
       final artboard = file.mainArtboard;
       var controller = StateMachineController.fromArtboard(
@@ -89,10 +93,23 @@ class _LoginScreenState extends State<LoginScreen> {
         automaticallyImplyLeading: false,
         centerTitle: true,
         titleTextStyle: AppFonts.headingLarge,
-        title: Text("Login"),
+        title: const Text("Login"),
       ),
       body: SingleChildScrollView(
-        child: Column(children: [_loginSection(context)]),
+        child: Column(
+          children: [
+            _loginSection(context),
+            const Gap(10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: GoogleLoginButton(
+                onPressed: () {
+                  context.read<AuthBloc>().add(Loginwithgoogle());
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -110,6 +127,9 @@ class _LoginScreenState extends State<LoginScreen> {
               if (state.loginState == LoginState.Success) {
                 _isChecking?.value = false;
                 _trigSuccess?.value = true;
+                Future.delayed(const Duration(seconds: 2), () {
+                  SplashService.checkifuserexists();
+                });
               } else if (state.loginState == LoginState.Failed) {
                 _isChecking?.value = false;
                 _trigFail?.value = true;
@@ -125,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           : Get.height * 0.25,
                       child: _riveArtboard != null
                           ? Rive(artboard: _riveArtboard!)
-                          : Center(
+                          : const Center(
                               child: Text(
                                 "The Bear is on his way ....",
                                 style: AppFonts.body,
@@ -227,13 +247,20 @@ class _LoginScreenState extends State<LoginScreen> {
                         isloading: state.isloading,
                       ),
                     ),
-                    if (!state.isloading) Gap(Get.height * 0.025),
+                    if (!state.isloading) Gap(Get.height * 0.014),
+                    ActionText(
+                      text: "Forgot Password?",
+                      actionText: "Reset Password",
+                      onTap: () =>
+                          NavigationService.goto(AppRoutes.forgotpassword),
+                    ),
+                    Gap(Get.height * 0.015),
                     ActionText(
                       text: "Don't have an account?",
                       actionText: "Signup",
                       onTap: () => NavigationService.goto(AppRoutes.signup),
                     ),
-                    Gap(Get.height * 0.04),
+                    Gap(Get.height * 0.015),
                   ],
                 );
               },

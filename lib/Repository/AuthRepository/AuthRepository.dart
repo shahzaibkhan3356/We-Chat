@@ -1,6 +1,7 @@
 import 'package:chat_app/Routes/route_names/routenames.dart';
 import 'package:chat_app/Utils/NavigationService/navigation_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 
 class AuthRepo {
@@ -27,36 +28,54 @@ class AuthRepo {
   }
 
   Future<void> googleLogin() async {
-    await GoogleSignInPlatform.instance.init(const InitParameters());
+    try {
+      // Step 1: Init
+      await GoogleSignInPlatform.instance.init(const InitParameters());
 
-    final AuthenticationResults result = await GoogleSignInPlatform.instance
-        .authenticate(const AuthenticateParameters());
+      // Step 2: Authenticate
+      final AuthenticationResults result = await GoogleSignInPlatform.instance
+          .authenticate(const AuthenticateParameters());
 
-    final user = result.user;
-    final tokens = await GoogleSignInPlatform.instance
-        .clientAuthorizationTokensForScopes(
-          ClientAuthorizationTokensForScopesParameters(
-            request: AuthorizationRequestDetails(
-              scopes: ['email', 'profile'],
-              userId: user.id,
-              email: user.email,
-              promptIfUnauthorized: false,
+      final user = result.user;
+
+      // Step 3: Get tokens
+      final tokens = await GoogleSignInPlatform.instance
+          .clientAuthorizationTokensForScopes(
+            ClientAuthorizationTokensForScopesParameters(
+              request: AuthorizationRequestDetails(
+                scopes: ['email', 'profile'],
+                userId: user.id,
+                email: user.email,
+                promptIfUnauthorized: true, // changed from false
+              ),
             ),
-          ),
+          );
+
+      if (tokens == null) {
+        throw FirebaseAuthException(
+          code: "token-error",
+          message: "Failed to get Google access tokens.",
         );
+      }
+      debugPrint("User: ${result.user.email}");
+      debugPrint("AccessToken: ${tokens.accessToken}");
 
-    if (tokens == null) {
-      throw FirebaseAuthException(
-        code: "token-error",
-        message: "Failed to get Google access tokens.",
+      // Step 4: Firebase auth
+      final credential = GoogleAuthProvider.credential(
+        accessToken: tokens.accessToken,
       );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+      if (e is FirebaseAuthException) {
+        rethrow;
+      } else {
+        throw FirebaseAuthException(
+          code: "google-login-error",
+          message: e.toString(),
+        );
+      }
     }
-
-    final credential = GoogleAuthProvider.credential(
-      accessToken: tokens.accessToken,
-    );
-
-    await _auth.signInWithCredential(credential);
   }
 
   String getAuthErrorMessage(String errorCode) {

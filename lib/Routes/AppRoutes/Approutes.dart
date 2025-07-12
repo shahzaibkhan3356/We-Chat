@@ -1,4 +1,5 @@
 // lib/app/routes/app_pages.dart
+import 'package:chat_app/Presentation/Ui/Auth/ForgotPassword/ForgotPasswordScreen.dart';
 import 'package:chat_app/Presentation/Ui/Auth/Login/LoginScreen.dart';
 import 'package:chat_app/Presentation/Ui/Auth/Signup/SignupScreen.dart';
 import 'package:chat_app/Presentation/Ui/Home/HomeScreen.dart';
@@ -17,7 +18,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.signup,
-      page: () => SignupScreen(),
+      page: () => const SignupScreen(),
       transition: Transition.fade,
     ),
     GetPage(
@@ -32,6 +33,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.splash,
       page: () => const SplashScreen(),
+      transition: Transition.fade,
+    ),
+    GetPage(
+      name: AppRoutes.forgotpassword,
+      page: () => const Forgotpasswordscreen(),
       transition: Transition.fade,
     ),
   ];

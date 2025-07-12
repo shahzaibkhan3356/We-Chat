@@ -42,7 +42,9 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
-    rootBundle.load('assets/animations/animated_login.riv').then((data) {
+    rootBundle.load('assets/animations/animated_login_character.riv').then((
+      data,
+    ) {
       final file = RiveFile.import(data);
       final artboard = file.mainArtboard;
       var controller = StateMachineController.fromArtboard(
@@ -89,7 +91,7 @@ class _SignupScreenState extends State<SignupScreen> {
       appBar: AppBar(
         centerTitle: true,
         titleTextStyle: AppFonts.headingLarge,
-        title: Text("Sign Up"),
+        title: const Text("Sign Up"),
       ),
       body: SingleChildScrollView(
         child: Column(children: [_loginSection(context)]),
@@ -109,6 +111,9 @@ class _SignupScreenState extends State<SignupScreen> {
               if (state.loginState == LoginState.Success) {
                 _isChecking?.value = false;
                 _trigSuccess?.value = true;
+                Future.delayed(const Duration(seconds: 2), () {
+                  NavigationService.Gofromall(AppRoutes.home);
+                });
               } else if (state.loginState == LoginState.Failed) {
                 _isChecking?.value = false;
                 _trigFail?.value = true;
@@ -124,7 +129,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           : Get.height * 0.25,
                       child: _riveArtboard != null
                           ? Rive(artboard: _riveArtboard!)
-                          : Center(
+                          : const Center(
                               child: Text(
                                 "The Bear is on his way ....",
                                 style: AppFonts.body,

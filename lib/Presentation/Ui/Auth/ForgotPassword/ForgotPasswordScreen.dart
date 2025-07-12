@@ -2,12 +2,13 @@ import 'package:chat_app/Bloc/AuthBloc/auth_bloc.dart';
 import 'package:chat_app/Bloc/AuthBloc/auth_event.dart';
 import 'package:chat_app/Bloc/AuthBloc/auth_state.dart';
 import 'package:chat_app/Presentation/Widgets/Buttons/TextButton.dart';
+import 'package:chat_app/Routes/route_names/routenames.dart';
+import 'package:chat_app/Utils/NavigationService/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
-import '../../../../Utils/Constants/AppColors/Appcolors.dart';
 import '../../../../Utils/Constants/AppFonts/AppFonts.dart';
 import '../../../Widgets/Buttons/CommonButton.dart';
 import '../../../Widgets/Container/GlassContainer.dart';
@@ -22,10 +23,10 @@ class Forgotpasswordscreen extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
     final email = TextEditingController();
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.black38,
       body: Center(
         child: GlassContainer(
-          height: Get.height * 0.45,
+          height: Get.height * 0.34,
           width: Get.width * 0.85,
           child: Form(
             key: formKey,
@@ -35,7 +36,7 @@ class Forgotpasswordscreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
+                      const Text(
                         "Reset Password",
                         style: AppFonts.headingLarge,
                         textAlign: TextAlign.center,
@@ -77,13 +78,13 @@ class Forgotpasswordscreen extends StatelessWidget {
                           }
                         },
                       ),
-                      Gap(10),
+                      const Gap(10),
                       Center(
                         child: ActionText(
                           text: "Go Back To",
                           actionText: "Login",
                           onTap: () {
-                            // NavigationService.goto(SignupScreen());
+                            NavigationService.goto(AppRoutes.login);
                           },
                         ),
                       ),

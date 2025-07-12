@@ -20,13 +20,12 @@ class _HomescreenState extends State<Homescreen>
   late Animation<double> animation;
   late CurvedAnimation curve;
 
-  final List<Widget> _screens = [Chatspage(), Contactspage(), Profilepage()];
+  final List<Widget> _screens = [const Chatspage(), const Contactspage(), const Profilepage()];
 
   final iconList = <IconData>[
     CupertinoIcons.chat_bubble,
     Icons.contacts_outlined,
     CupertinoIcons.arrow_2_circlepath,
-    CupertinoIcons.profile_circled,
   ];
 
   @override
@@ -62,7 +61,6 @@ class _HomescreenState extends State<Homescreen>
               ? 'Stories'
               : _currentIndex == 2
               ? 'Contacts'
-              : 'Profile',
           style: AppFonts.headingSmall,
         ),
         centerTitle: true,
