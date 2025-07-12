@@ -60,7 +60,8 @@ class _HomescreenState extends State<Homescreen>
               : _currentIndex == 2
               ? 'Stories'
               : _currentIndex == 2
-              ? 'Contacts'
+              ? 'Contacts',
+              
           style: AppFonts.headingSmall,
         ),
         centerTitle: true,
