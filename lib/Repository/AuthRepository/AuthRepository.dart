@@ -1,5 +1,5 @@
+import 'package:chat_app/Routes/route_names/routenames.dart';
 import 'package:chat_app/Utils/NavigationService/navigation_service.dart';
-import 'package:chat_app/routes/routes_names.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
 
@@ -9,12 +9,17 @@ class AuthRepo {
   Future<void> loginWithEmail(String email, String password) async {
     await _auth.signInWithEmailAndPassword(email: email, password: password);
   }
-Future<void> logout() async {
-   await _auth.signOut();
-   NavigationService.Gofromall(AppRoutes.login);
-}
+
+  Future<void> logout() async {
+    await _auth.signOut();
+    NavigationService.Gofromall(AppRoutes.login);
+  }
+
   Future<void> signup(String email, String password) async {
-    await _auth.createUserWithEmailAndPassword(email: email, password: password);
+    await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
   Future<void> resetPassword(String email) async {
@@ -24,23 +29,21 @@ Future<void> logout() async {
   Future<void> googleLogin() async {
     await GoogleSignInPlatform.instance.init(const InitParameters());
 
-    final AuthenticationResults result =
-    await GoogleSignInPlatform.instance.authenticate(
-      const AuthenticateParameters(),
-    );
+    final AuthenticationResults result = await GoogleSignInPlatform.instance
+        .authenticate(const AuthenticateParameters());
 
     final user = result.user;
     final tokens = await GoogleSignInPlatform.instance
         .clientAuthorizationTokensForScopes(
-      ClientAuthorizationTokensForScopesParameters(
-        request: AuthorizationRequestDetails(
-          scopes: ['email', 'profile'],
-          userId: user.id,
-          email: user.email,
-          promptIfUnauthorized: false,
-        ),
-      ),
-    );
+          ClientAuthorizationTokensForScopesParameters(
+            request: AuthorizationRequestDetails(
+              scopes: ['email', 'profile'],
+              userId: user.id,
+              email: user.email,
+              promptIfUnauthorized: false,
+            ),
+          ),
+        );
 
     if (tokens == null) {
       throw FirebaseAuthException(

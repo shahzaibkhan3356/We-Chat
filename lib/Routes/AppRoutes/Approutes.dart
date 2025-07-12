@@ -21,7 +21,7 @@ class AppPages {
       transition: Transition.fade,
     ),
     GetPage(
-      name: AppRoutes.profileSetup,
+      name: AppRoutes.profilesetup,
       page: () => const ProfileSetupScreen(),
     ),
     GetPage(

@@ -11,13 +11,12 @@ import '../../../../Bloc/AuthBloc/auth_bloc.dart';
 import '../../../../Bloc/AuthBloc/auth_state.dart';
 import '../../../../Utils/Constants/AppFonts/AppFonts.dart';
 import '../../../../Utils/NavigationService/navigation_service.dart';
-import '../../../../routes/routes_names.dart';
 import '../../../Widgets/Buttons/CommonButton.dart';
 import '../../../Widgets/Buttons/TextButton.dart';
 import '../../../Widgets/TextInputWidget/TextInputWidget.dart';
 
 class SignupScreen extends StatefulWidget {
-  SignupScreen({super.key});
+  const SignupScreen({super.key});
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -65,7 +64,8 @@ class _SignupScreenState extends State<SignupScreen> {
     });
 
     _emailController = TextEditingController()..addListener(_emailListener);
-    _passwordController = TextEditingController()..addListener(_passwordListener);
+    _passwordController = TextEditingController()
+      ..addListener(_passwordListener);
 
     _emailFocusNode = FocusNode();
     _passwordFocusNode = FocusNode();
@@ -91,11 +91,7 @@ class _SignupScreenState extends State<SignupScreen> {
         title: Text("Sign Up"),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _loginSection(context),
-          ],
-        ),
+        child: Column(children: [_loginSection(context)]),
       ),
     );
   }
@@ -128,22 +124,26 @@ class _SignupScreenState extends State<SignupScreen> {
                       child: _riveArtboard != null
                           ? Rive(artboard: _riveArtboard!)
                           : Center(
-                        child: Text(
-                          "The Bear is on his way ....",
-                          style: AppFonts.body,
-                        ),
-                      ),
+                              child: Text(
+                                "The Bear is on his way ....",
+                                style: AppFonts.body,
+                              ),
+                            ),
                     ),
                     Gap(Get.height * 0.02),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: Get.width * 0.04,
+                      ),
                       child: InputFields(
                         prefixIcon: Icons.email_outlined,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Email is required';
                           }
-                          final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                          final emailRegex = RegExp(
+                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                          );
                           if (!emailRegex.hasMatch(value.trim())) {
                             return 'Enter a valid email address';
                           }
@@ -167,16 +167,21 @@ class _SignupScreenState extends State<SignupScreen> {
                         }
                       },
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: Get.width * 0.04,
+                        ),
                         child: InputFields(
                           suffixIcon: IconButton(
                             onPressed: () {
                               context.read<AuthBloc>().add(
-                                  Showorhidepass(value: state.showpassword));
+                                Showorhidepass(value: state.showpassword),
+                              );
                             },
-                            icon: Icon(state.showpassword
-                                ? CupertinoIcons.eye
-                                : CupertinoIcons.eye_fill),
+                            icon: Icon(
+                              state.showpassword
+                                  ? CupertinoIcons.eye
+                                  : CupertinoIcons.eye_fill,
+                            ),
                           ),
                           prefixIcon: Icons.password_outlined,
                           validator: (value) {

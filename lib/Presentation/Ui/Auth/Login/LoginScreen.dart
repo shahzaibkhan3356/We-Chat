@@ -6,7 +6,6 @@ import 'package:chat_app/Presentation/Widgets/Buttons/TextButton.dart';
 import 'package:chat_app/Presentation/Widgets/TextInputWidget/TextInputWidget.dart';
 import 'package:chat_app/Utils/Constants/AppFonts/AppFonts.dart';
 import 'package:chat_app/Utils/NavigationService/navigation_service.dart';
-import 'package:chat_app/routes/routes_names.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -64,7 +63,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     _emailController = TextEditingController()..addListener(_emailListener);
-    _passwordController = TextEditingController()..addListener(_passwordListener);
+    _passwordController = TextEditingController()
+      ..addListener(_passwordListener);
 
     _emailFocusNode = FocusNode();
     _passwordFocusNode = FocusNode();
@@ -91,11 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
         title: Text("Login"),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _loginSection(context),
-          ],
-        ),
+        child: Column(children: [_loginSection(context)]),
       ),
     );
   }
@@ -107,7 +103,8 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Form(
           key: _formKey,
           child: BlocListener<AuthBloc, AuthState>(
-            listenWhen: (previous, current) => previous.loginState != current.loginState,
+            listenWhen: (previous, current) =>
+                previous.loginState != current.loginState,
             listener: (context, state) {
               if (state.loginState == LoginState.Success) {
                 _isChecking?.value = false;
@@ -122,10 +119,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 return Column(
                   children: [
                     SizedBox(
-                      height: _riveArtboard != null ? Get.height * 0.28 : Get.height * 0.25,
+                      height: _riveArtboard != null
+                          ? Get.height * 0.28
+                          : Get.height * 0.25,
                       child: _riveArtboard != null
                           ? Rive(artboard: _riveArtboard!)
-                          : Center(child: Text("The Bear is on his way ....", style: AppFonts.body)),
+                          : Center(
+                              child: Text(
+                                "The Bear is on his way ....",
+                                style: AppFonts.body,
+                              ),
+                            ),
                     ),
                     Padding(
                       padding: EdgeInsets.symmetric(
@@ -139,7 +143,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           if (value == null || value.trim().isEmpty) {
                             return 'Email is required';
                           }
-                          final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                          final emailRegex = RegExp(
+                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                          );
                           if (!emailRegex.hasMatch(value.trim())) {
                             return 'Enter a valid email address';
                           }
@@ -162,17 +168,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         }
                       },
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: Get.width * 0.04),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: Get.width * 0.04,
+                        ),
                         child: InputFields(
-
                           suffixIcon: IconButton(
                             onPressed: () {
                               context.read<AuthBloc>().add(
-                                  Showorhidepass(value: state.showpassword));
+                                Showorhidepass(value: state.showpassword),
+                              );
                             },
-                            icon: Icon(state.showpassword
-                                ? CupertinoIcons.eye
-                                : CupertinoIcons.eye_fill),
+                            icon: Icon(
+                              state.showpassword
+                                  ? CupertinoIcons.eye
+                                  : CupertinoIcons.eye_fill,
+                            ),
                           ),
                           prefixIcon: Icons.password_outlined,
                           validator: (value) {
@@ -202,9 +212,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           FocusScope.of(context).unfocus();
                           if (_formKey.currentState!.validate()) {
                             _isChecking?.value = true;
-                            context.read<AuthBloc>().add(Loginwithemail(
+                            context.read<AuthBloc>().add(
+                              Loginwithemail(
                                 email: _emailController.text.trim(),
-                                password: _passwordController.text.trim()));
+                                password: _passwordController.text.trim(),
+                              ),
+                            );
                           } else {
                             _isChecking?.value = false;
                             _trigFail?.value = true;
