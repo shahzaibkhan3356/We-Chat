@@ -23,6 +23,7 @@ class UpdateUser extends UserEvent {
   @override
   List<Object?> get props => [userModel];
 }
+class GetUserData extends UserEvent {}
 
 class PickAndUploadProfileImage extends UserEvent {
   final ImageSource source;
@@ -31,7 +32,9 @@ class PickAndUploadProfileImage extends UserEvent {
   @override
   List<Object?> get props => [source];
 }
+class FetchProfilePicUrl extends UserEvent {
 
+}
 // 🔹 Upload picked image to Firebase
 class UploadProfileImage extends UserEvent {
   final String imagePath; // local file path to upload

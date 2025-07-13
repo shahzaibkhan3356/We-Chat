@@ -49,6 +49,16 @@ class FirestoreRepo {
       rethrow;
     }
   }
+  Stream<UserModel?> streamUser({String? uid}) {
+    return _firestore.collection('Users').doc(uid ?? _uid).snapshots().map(
+          (doc) {
+        if (doc.exists) {
+          return UserModel.fromMap(doc.data()!, doc.id);
+        }
+        return null;
+      },
+    );
+  }
 
   Future<void> updateUser(UserModel user) async {
     try {
@@ -84,6 +94,16 @@ class FirestoreRepo {
     }
   }
 
+  Future<String?> getProfilePictureUrl() async {
+      final User = _auth.currentUser;
+      if (User == null) return null;
+      final docSnapshot =
+      await _firestore.collection('Users').doc(User.uid).get();
+      if (docSnapshot.exists) {
+        final data = docSnapshot.data();
+        return data?['profilePic'] as String?;
+      }
+  }
 
   Future<void> deleteProfilePicture() async {
     try {
@@ -110,15 +130,7 @@ class FirestoreRepo {
     }
   }
 
-  // Future<String?> getProfilePictureUrl({String? uid}) async {
-  //   try {
-  //     final user = await getUser(uid: uid);
-  //     return user?.profilePic;
-  //   } catch (e) {
-  //     print('Error getting profile picture URL: $e');
-  //     return null;
-  //   }
-  // }
+
   String getErrorMessage(e) {
     if (e is FirebaseException) {
       switch (e.code) {

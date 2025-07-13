@@ -13,7 +13,7 @@ class AuthRepo {
 
   Future<void> logout() async {
     await _auth.signOut();
-    NavigationService.Gofromall(AppRoutes.login);
+    NavigationService.Gofromall(RouteNames.login);
   }
 
   Future<void> signup(String email, String password) async {

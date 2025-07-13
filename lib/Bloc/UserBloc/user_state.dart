@@ -5,6 +5,7 @@ class UserState extends Equatable {
   final String errorMessage;
   final List<UserModel> allUsers;
   final UserModel? currentUser;
+  final Stream<UserModel?>? currentUserStream;
 
   final String? profileImageUrl;        // Final uploaded image URL from Firebase
   final String? localProfileImagePath;  // Temporary image file path for UI preview
@@ -17,6 +18,8 @@ class UserState extends Equatable {
     this.allUsers = const [],
     this.currentUser,
     this.profileImageUrl,
+    this.currentUserStream,
+
     this.localProfileImagePath,
     this.isLoading = false,
     this.isUploadingProfileImage = false,
@@ -28,12 +31,14 @@ class UserState extends Equatable {
     UserModel? currentUser,
     String? profileImageUrl,
     String? localProfileImagePath,
+     Stream<UserModel?>? currentUserStream,
     bool? isLoading,
     bool? isUploadingProfileImage,
   }) {
     return UserState(
       errorMessage: errorMessage ?? this.errorMessage,
       allUsers: allUsers ?? this.allUsers,
+      currentUserStream: currentUserStream ?? this.currentUserStream,
       currentUser: currentUser ?? this.currentUser,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       localProfileImagePath: localProfileImagePath ?? this.localProfileImagePath,
@@ -51,5 +56,6 @@ class UserState extends Equatable {
     localProfileImagePath,
     isLoading,
     isUploadingProfileImage,
+    currentUserStream
   ];
 }

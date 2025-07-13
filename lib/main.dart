@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => UserBloc(FirestoreRepo())),
       ],
       child: GetMaterialApp(
-        initialRoute: AppRoutes.splash,
+        initialRoute: RouteNames.splash,
         getPages: AppPages.routes,
         debugShowCheckedModeBanner: false,
         themeMode: ThemeMode.dark,

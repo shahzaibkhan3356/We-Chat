@@ -108,6 +108,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                                       context.read<UserBloc>().add(
                                         AddUser(
                                           userModel: UserModel(
+                                            name: namecontroller.text.trim(),
                                             profilePic: state.profileImageUrl!,
                                             uid: uid,
                                             email: email,

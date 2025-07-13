@@ -84,7 +84,7 @@ class Forgotpasswordscreen extends StatelessWidget {
                           text: "Go Back To",
                           actionText: "Login",
                           onTap: () {
-                            NavigationService.goto(AppRoutes.login);
+                            NavigationService.goto(RouteNames.login);
                           },
                         ),
                       ),

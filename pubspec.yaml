@@ -61,6 +61,7 @@ dependencies:
   timeline_tile: ^2.0.0
   animated_bottom_navigation_bar: ^1.4.0
   flutter_launcher_icons: ^0.14.4
+  cached_network_image: ^3.4.1
 
 
 dev_dependencies:

@@ -12,7 +12,7 @@ class SplashService {
     final currentUser = _auth.currentUser;
     if (currentUser == null) {
       // Not logged in
-      NavigationService.Gofromall(AppRoutes.login);
+      NavigationService.Gofromall(RouteNames.login);
       return;
     }
     try {
@@ -24,10 +24,10 @@ class SplashService {
           userDoc.data() != null &&
           userDoc.data()!.isNotEmpty) {
         // Profile exists
-        NavigationService.Gofromall(AppRoutes.home);
+        NavigationService.Gofromall(RouteNames.home);
       } else {
         // Logged in but profile missing
-        NavigationService.Gofromall(AppRoutes.profilesetup);
+        NavigationService.Gofromall(RouteNames.profilesetup);
       }
     } catch (e) {
       print("Error in SplashService: $e");
@@ -40,7 +40,7 @@ class SplashService {
 
     if (currentUser == null) {
       // Not logged in
-      NavigationService.Gofromall(AppRoutes.login);
+      NavigationService.Gofromall(RouteNames.login);
       return;
     }
 
@@ -54,14 +54,14 @@ class SplashService {
           userDoc.data() != null &&
           userDoc.data()!.isNotEmpty) {
         // Profile exists
-        NavigationService.Gofromall(AppRoutes.home);
+        NavigationService.Gofromall(RouteNames.home);
       } else {
         // Logged in but profile missing
-        NavigationService.Gofromall(AppRoutes.profilesetup);
+        NavigationService.Gofromall(RouteNames.profilesetup);
       }
     } catch (e) {
       print("Error in SplashService: $e");
-      NavigationService.Gofromall(AppRoutes.login);
+      NavigationService.Gofromall(RouteNames.login);
     }
   }
 }

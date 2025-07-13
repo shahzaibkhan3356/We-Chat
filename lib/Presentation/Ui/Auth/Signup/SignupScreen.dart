@@ -112,7 +112,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 _isChecking?.value = false;
                 _trigSuccess?.value = true;
                 Future.delayed(const Duration(seconds: 2), () {
-                  NavigationService.Gofromall(AppRoutes.home);
+                  NavigationService.Gofromall(RouteNames.home);
                 });
               } else if (state.loginState == LoginState.Failed) {
                 _isChecking?.value = false;
@@ -236,7 +236,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       text: "Already Have a Acount ?",
                       actionText: "Login",
                       onTap: () {
-                        NavigationService.goto(AppRoutes.login);
+                        NavigationService.goto(RouteNames.login);
                       },
                     ),
                     Gap(Get.height * 0.04),

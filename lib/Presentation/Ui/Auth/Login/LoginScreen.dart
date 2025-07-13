@@ -99,9 +99,8 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: [
             _loginSection(context),
-            const Gap(10),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 30),
               child: GoogleLoginButton(
                 onPressed: () {
                   context.read<AuthBloc>().add(Loginwithgoogle());
@@ -252,13 +251,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       text: "Forgot Password?",
                       actionText: "Reset Password",
                       onTap: () =>
-                          NavigationService.goto(AppRoutes.forgotpassword),
+                          NavigationService.goto(RouteNames.forgotpassword),
                     ),
                     Gap(Get.height * 0.015),
                     ActionText(
                       text: "Don't have an account?",
                       actionText: "Signup",
-                      onTap: () => NavigationService.goto(AppRoutes.signup),
+                      onTap: () => NavigationService.goto(RouteNames.signup),
                     ),
                     Gap(Get.height * 0.015),
                   ],
