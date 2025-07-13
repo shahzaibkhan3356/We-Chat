@@ -1,10 +1,18 @@
+import 'package:chat_app/Bloc/AuthBloc/auth_bloc.dart';
+import 'package:chat_app/Bloc/AuthBloc/auth_event.dart';
 import 'package:chat_app/Bloc/UserBloc/user_bloc.dart';
 import 'package:chat_app/Bloc/UserBloc/user_event.dart';
 import 'package:chat_app/Bloc/UserBloc/user_state.dart';
+import 'package:chat_app/Data/Models/Usermodel/Usermodel.dart';
+import 'package:chat_app/Presentation/Widgets/Buttons/CommonButton.dart';
+import 'package:chat_app/Presentation/Widgets/ProfilePicWidget/ProfilePicWidget.dart';
+import 'package:chat_app/Presentation/Widgets/TextInputWidget/TextInputWidget.dart';
+import 'package:chat_app/Utils/Constants/AppFonts/AppFonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
 class Profilepage extends StatefulWidget {
   const Profilepage({super.key});
@@ -14,135 +22,158 @@ class Profilepage extends StatefulWidget {
 }
 
 class _ProfilepageState extends State<Profilepage> {
-  bool isEditMode = false;
-  late TextEditingController nameController;
-  late TextEditingController numberController;
-  late TextEditingController bioController;
-
+  TextEditingController namecontroller = TextEditingController();
+  TextEditingController mobilecontroller = TextEditingController();
+  TextEditingController emailcontroller = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  TextEditingController biocon = TextEditingController();
+ bool iseditmode=false;
   @override
   void initState() {
     super.initState();
-    context.read<UserBloc>().add(GetUserData());
-    nameController = TextEditingController();
-    numberController = TextEditingController();
-    bioController = TextEditingController();
+    final user = context.read<UserBloc>().state.currentUser;
+    if (user != null) {
+      namecontroller.text = user.name;
+      mobilecontroller.text = user.number;
+      biocon.text = user.bio;
+      emailcontroller.text = FirebaseAuth.instance.currentUser?.email ?? '';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("My Profile"),
-        actions: [
-          IconButton(
-            icon: Icon(isEditMode ? Icons.check : Icons.edit),
-            onPressed: () {
-              if (isEditMode) {
-                _onSavePressed(context);
-              } else {
-                setState(() => isEditMode = true);
-              }
-            },
-          ),
-        ],
-      ),
-      body: BlocBuilder<UserBloc, UserState>(
-        builder: (context, state) {
-          if (state.currentUserStream == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return
+      Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          titleTextStyle: AppFonts.headingSmall,
+          title: Text("My Profile"),
+        ),
+    body:
+      Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              if(!iseditmode)
+              IgnorePointer(child: const ProfileImagePicker()),
+              if(iseditmode)
+                ProfileImagePicker(),
+              Gap(Get.height * 0.02),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Form(
+                      key: _formKey,
+                      child: BlocBuilder<UserBloc, UserState>(
+                        builder: (context, state) {
+                          return Column(
+                            children: [
+                              InputFields(
+enabled: iseditmode,
+                                label: "Name",
+                                hintText: "",
+                                controller: namecontroller,
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Name is required';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              Gap(Get.height * 0.02),
+                              InputFields(
+                                enabled: iseditmode,
+                                label: "Mobile Number",
+                                hintText: "",
+                                controller: mobilecontroller,
+                                keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Mobile Number is required';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              Gap(Get.height * 0.02),
+                              InputFields(
+                                enabled: iseditmode,
+                                label: "Bio",
+                                hintText: "Tell us Something About You",
+                                controller: biocon,
+                                textInputAction: TextInputAction.done,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Bio is required';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              Gap(Get.height * 0.03),
+                              CustomButton(
+                                title: iseditmode ? "Save Profile" : "Edit Profile",
+                                ontap: () {
+                                  if(iseditmode){
+                                    FocusScope.of(context).unfocus();
+                                    if (_formKey.currentState!.validate()) {
+                                      FirebaseAuth auth = FirebaseAuth.instance;
+                                      if (auth.currentUser != null) {
+                                        User currentuser = auth.currentUser!;
+                                        String email = currentuser.email!;
+                                        String uid = currentuser.uid;
+                                        context.read<UserBloc>().add(
+                                          UpdateUser(
+                                            userModel: UserModel(
+                                              name: namecontroller.text.trim(),
+                                              profilePic: state.profileImageUrl!,
+                                              uid: uid,
+                                              email: email,
+                                              number: mobilecontroller.text.trim(),
+                                              bio: biocon.text.trim(),
+                                            ),
+                                          ),
+                                        );
 
-          return StreamBuilder(
-            stream: state.currentUserStream,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const CircularProgressIndicator();
-              final user = snapshot.data!;
+                                      }
+                                      iseditmode=!iseditmode;
+                                      setState(() {
+                                      });
+                                    }
 
-              nameController.text = user.name;
-              numberController.text = user.number;
-              bioController.text = user.bio ?? '';
-
-              return SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: Get.width * 0.06),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    GestureDetector(
-                      onTap: () {
-                        context.read<UserBloc>().add(
-                     PickAndUploadProfileImage(source: ImageSource.gallery)
-                        );
-                      },
-                      child: Stack(
-                        alignment: Alignment.bottomRight,
-                        children: [
-                          CircleAvatar(
-                            radius: 60,
-                            backgroundImage: NetworkImage(user.profilePic),
-                          ),
-                          const CircleAvatar(
-                            radius: 18,
-                            backgroundColor: Colors.black,
-                            child: Icon(Icons.camera_alt, color: Colors.white, size: 18),
-                          ),
-                        ],
+                                  }
+                                  else{
+                                    iseditmode=!iseditmode;
+                                    setState(() {
+                                    });
+                                  }
+                                },
+                                isloading: state.isLoading,
+                              ),
+                              Gap(Get.height * 0.025),
+                              CustomButton(
+                                title: "Log Out",
+                                ontap: () {
+                                  context.read<AuthBloc>().add(Logout());
+                                },
+                                isloading: state.isLoading,
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
-                    const SizedBox(height: 20),
-
-                    _buildField("Name", nameController, enabled: isEditMode),
-                    _buildField("Phone", numberController, enabled: isEditMode),
-                    _buildField("Bio", bioController, enabled: isEditMode, maxLines: 3),
-
-                    const SizedBox(height: 20),
-                    Text(
-                      user.email,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ],
+                  ),
                 ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildField(String label, TextEditingController controller,
-      {bool enabled = false, int maxLines = 1}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: TextField(
-        controller: controller,
-        enabled: enabled,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+              ),
+            ],
           ),
-          filled: !enabled,
-          fillColor: enabled ? null : Colors.grey.shade200,
         ),
       ),
-    );
-  }
-
-  void _onSavePressed(BuildContext context) {
-    final bloc = context.read<UserBloc>();
-    final currentUser = bloc.state.currentUser;
-
-    if (currentUser != null) {
-      final updatedUser = currentUser.copyWith(
-        name: nameController.text,
-        number: numberController.text,
-        bio: bioController.text,
-      );
-
-    bloc.add(UpdateUser(userModel: updatedUser));
-    }
-
-    setState(() => isEditMode = false);
+      ));
   }
 }

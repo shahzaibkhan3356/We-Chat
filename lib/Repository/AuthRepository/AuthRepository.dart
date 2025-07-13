@@ -13,7 +13,7 @@ class AuthRepo {
 
   Future<void> logout() async {
     await _auth.signOut();
-    NavigationService.Gofromall(RouteNames.login);
+    await GoogleSignInPlatform.instance.signOut(const SignOutParams());
   }
 
   Future<void> signup(String email, String password) async {

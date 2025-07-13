@@ -33,7 +33,7 @@ class Signupwithemail extends AuthEvent {
   // TODO: implement props
   List<Object?> get props => [email, password];
 }
-
+class Logout extends AuthEvent {}
 class Loginwithgoogle extends AuthEvent {}
 
 class ResetPassword extends AuthEvent {

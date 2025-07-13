@@ -17,12 +17,15 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     on<GetAllUsers>(_getAllUsers);
     on<PickAndUploadProfileImage>(_onPickAndUploadImage);
     on<FetchProfilePicUrl>(_onFetchProfilePic);
-    on<GetUserData>((event, emit) {
-      final stream = firestoreRepo.streamUser();
-      emit(state.copyWith(currentUserStream: stream));
+    on<GetUserData>((event, emit) async {
+      final user = await firestoreRepo.getUser();
+      emit(state.copyWith(currentUser: user));
     });
-
   }
+
+
+
+
 
   Future<void> _onAddUser(AddUser event, Emitter<UserState> emit) async {
     emit(state.copyWith(isLoading: true));
@@ -45,7 +48,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(state.copyWith(isLoading: true));
     try {
       await firestoreRepo.updateUser(event.userModel);
-      NavigationService.Gofromall(RouteNames.home);
       showSnackbar("Profile", "Profile Updated Successfully");
       emit(state.copyWith(isLoading: false, currentUser: event.userModel));
     } catch (e) {
@@ -72,23 +74,22 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       );
     }
   }
+
   Future<void> _onFetchProfilePic(
-      FetchProfilePicUrl event,
-      Emitter<UserState> emit,
-      ) async {
+    FetchProfilePicUrl event,
+    Emitter<UserState> emit,
+  ) async {
     emit(state.copyWith(isLoading: true));
     try {
-      final profileUrl =
-      await firestoreRepo.getProfilePictureUrl();
-      emit(state.copyWith(
-        isLoading: false,
-        profileImageUrl: profileUrl ?? '',
-      ));
+      final profileUrl = await firestoreRepo.getProfilePictureUrl();
+      emit(state.copyWith(isLoading: false, profileImageUrl: profileUrl ?? ''));
     } catch (e) {
-      emit(state.copyWith(
-        isLoading: false,
-        errorMessage: firestoreRepo.getErrorMessage(e),
-      ));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: firestoreRepo.getErrorMessage(e),
+        ),
+      );
     }
   }
 

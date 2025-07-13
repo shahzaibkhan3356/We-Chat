@@ -5,6 +5,9 @@ import 'package:chat_app/Utils/Snackbar/Snackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../Routes/route_names/routenames.dart';
+import '../../Utils/NavigationService/navigation_service.dart';
+
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepo authRepo;
 
@@ -13,6 +16,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<Signupwithemail>(_onSignupWithEmail);
     on<Showorhidepass>(_onShowOrHidePass);
     on<ResetPassword>(_onResetPassword);
+    on<Logout>(_onlogout);
     on<Loginwithgoogle>(_onloginwithgoogle);
   }
 
@@ -42,6 +46,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  Future<void> _onlogout(
+      Logout event,
+      Emitter<AuthState> emit,
+      ) async {
+    emit(state.copyWith(isloading: true, loginState: LoginState.Loading));
+
+    try {
+      await authRepo.logout();
+      showSnackbar("Logout", "Logged Out Successfully");
+      NavigationService.Gofromall(RouteNames.login);
+    } on FirebaseAuthException catch (e) {
+      final message = authRepo.getAuthErrorMessage(e.code);
+      showSnackbar("Logout Error", message);
+      emit(state.copyWith(isloading: false, loginState: LoginState.Failed));
+    } catch (e) {
+      showSnackbar("Logout Error", e.toString());
+      emit(state.copyWith(isloading: false, loginState: LoginState.Failed));
+    }
+  }
   Future<void> _onLoginWithEmail(
     Loginwithemail event,
     Emitter<AuthState> emit,

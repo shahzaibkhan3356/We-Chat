@@ -10,8 +10,8 @@ import '../../../../Bloc/UserBloc/user_event.dart';
 import '../../../../Bloc/UserBloc/user_state.dart';
 
 class ProfileImagePicker extends StatelessWidget {
-  const ProfileImagePicker({super.key});
-
+  final bool? iseditmode;
+  const ProfileImagePicker({super.key,this.iseditmode});
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<UserBloc, UserState>(
@@ -25,7 +25,6 @@ class ProfileImagePicker extends StatelessWidget {
         } else {
           imageProvider = const AssetImage("assets/Images/user.png");
         }
-
         return GestureDetector(
           onTap: () {
             context.read<UserBloc>().add(

@@ -34,11 +34,11 @@ class FirestoreRepo {
     }
   }
 
-  Future<UserModel?> getUser({String? uid}) async {
+  Future<UserModel?> getUser() async {
     try {
       final docSnapshot = await _firestore
           .collection('Users')
-          .doc(uid ?? _uid)
+          .doc(_auth.currentUser!.uid)
           .get();
       if (docSnapshot.exists) {
         return UserModel.fromMap(docSnapshot.data()!, docSnapshot.id);
@@ -49,15 +49,16 @@ class FirestoreRepo {
       rethrow;
     }
   }
+
   Stream<UserModel?> streamUser({String? uid}) {
-    return _firestore.collection('Users').doc(uid ?? _uid).snapshots().map(
-          (doc) {
-        if (doc.exists) {
-          return UserModel.fromMap(doc.data()!, doc.id);
-        }
-        return null;
-      },
-    );
+    return _firestore.collection('Users').doc(uid ?? _uid).snapshots().map((
+      doc,
+    ) {
+      if (doc.exists) {
+        return UserModel.fromMap(doc.data()!, doc.id);
+      }
+      return null;
+    });
   }
 
   Future<void> updateUser(UserModel user) async {
@@ -77,6 +78,7 @@ class FirestoreRepo {
       rethrow;
     }
   }
+
   Future<String?> uploadProfilePicture(String localFilePath) async {
     if (localFilePath.isEmpty) return null;
     final user = _auth.currentUser;
@@ -95,14 +97,17 @@ class FirestoreRepo {
   }
 
   Future<String?> getProfilePictureUrl() async {
-      final User = _auth.currentUser;
-      if (User == null) return null;
-      final docSnapshot =
-      await _firestore.collection('Users').doc(User.uid).get();
-      if (docSnapshot.exists) {
-        final data = docSnapshot.data();
-        return data?['profilePic'] as String?;
-      }
+    final User = _auth.currentUser;
+    if (User == null) return null;
+    final docSnapshot = await _firestore
+        .collection('Users')
+        .doc(User.uid)
+        .get();
+    if (docSnapshot.exists) {
+      final data = docSnapshot.data();
+      return data?['profilePic'] as String?;
+    }
+    return null;
   }
 
   Future<void> deleteProfilePicture() async {
@@ -129,7 +134,6 @@ class FirestoreRepo {
       }
     }
   }
-
 
   String getErrorMessage(e) {
     if (e is FirebaseException) {

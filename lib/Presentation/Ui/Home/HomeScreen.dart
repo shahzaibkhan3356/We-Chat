@@ -6,6 +6,7 @@ import 'package:chat_app/Bloc/UserBloc/user_state.dart';
 import 'package:chat_app/Presentation/Ui/Chats/ChatsPage.dart';
 import 'package:chat_app/Presentation/Ui/Contacts/ContactsPage.dart';
 import 'package:chat_app/Presentation/Ui/Profile/ProfilePage/ProfilePage.dart';
+import 'package:chat_app/Presentation/Ui/Stories/StoriesPage.dart';
 import 'package:chat_app/Utils/Constants/AppFonts/AppFonts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -28,14 +29,13 @@ class _HomescreenState extends State<Homescreen>
   late Animation<double> animation;
   late CurvedAnimation curve;
 
-  final List<Widget> _screens = [const Chatspage(), const Contactspage(), const Profilepage()];
+  final List<Widget> _screens = [const Chatspage(),  Storiespage(), const Contactspage()];
 
   final iconList = <IconData>[
     CupertinoIcons.chat_bubble,
     CupertinoIcons.arrow_2_circlepath,
     Icons.contacts_outlined,
   ];
-
   @override
   void initState() {
     super.initState();

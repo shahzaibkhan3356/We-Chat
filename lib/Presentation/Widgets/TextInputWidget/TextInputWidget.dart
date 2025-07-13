@@ -10,6 +10,7 @@ class InputFields extends StatelessWidget {
   final FocusNode? focusNode;
   final bool isPassword;
   final Widget? suffixIcon;
+  final bool? enabled;
   final TextEditingController controller;
   final String? Function(String?)? validator;
   final TextInputType keyboardType;
@@ -23,7 +24,7 @@ class InputFields extends StatelessWidget {
     required this.controller,
     this.focusNode,
     this.validator,
-
+this.enabled,
     this.isPassword = false,
     this.keyboardType = TextInputType.text,
     this.prefixIcon,
@@ -39,7 +40,7 @@ class InputFields extends StatelessWidget {
         Text(label, style: AppFonts.body.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         TextFormField(
-
+enabled: enabled,
           textInputAction: textInputAction, // Use the new property
           controller: controller,
           validator: validator,
