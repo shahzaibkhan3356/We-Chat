@@ -53,11 +53,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDFNWnSwxx2vJPNoyjts0AoHCFQJu5KCcg',
-    appId: '1:568607857778:android:ea43c840fecde2e97c76eb',
-    messagingSenderId: '568607857778',
-    projectId: 'fir-1-8b262',
-    databaseURL: 'https://fir-1-8b262-default-rtdb.firebaseio.com',
-    storageBucket: 'fir-1-8b262.appspot.com',
+    apiKey: 'AIzaSyAP1RwGDA7dw9tg4yr9pMBJJY9GnOEwRUo',
+    appId: '1:375232089049:android:189a344ade9a45e522e7c8',
+    messagingSenderId: '375232089049',
+    projectId: 'we-chat-4d842',
+    storageBucket: 'we-chat-4d842.firebasestorage.app',
   );
+
 }
