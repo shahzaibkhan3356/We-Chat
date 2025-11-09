@@ -53,11 +53,10 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAP1RwGDA7dw9tg4yr9pMBJJY9GnOEwRUo',
-    appId: '1:375232089049:android:189a344ade9a45e522e7c8',
-    messagingSenderId: '375232089049',
-    projectId: 'we-chat-4d842',
-    storageBucket: 'we-chat-4d842.firebasestorage.app',
+    apiKey: 'AIzaSyAmA-_YKcd1UXMmVq56rmOtVbpGDM6mmhw',
+    appId: '1:1033655241473:android:58ad3f7030d38eab11e900',
+    messagingSenderId: '1033655241473',
+    projectId: 'chatapp-b19f5',
+    storageBucket: 'chatapp-b19f5.firebasestorage.app',
   );
-
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chat_app/Bloc/AuthBloc/auth_event.dart';
 import 'package:chat_app/Bloc/AuthBloc/auth_state.dart';
 import 'package:chat_app/Repository/AuthRepository/AuthRepository.dart';
@@ -29,27 +31,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(state.copyWith(isloading: true, loginState: LoginState.Loading));
+    log("🟢 AuthBloc: Google login event triggered");
 
     try {
       await authRepo.googleLogin();
+      log("🟢 Google login successful from repo");
       showSnackbar("Login", "Logged in Successfully");
       emit(state.copyWith(isloading: false, loginState: LoginState.Success));
-      Future.delayed(const Duration(seconds: 2));
     } on FirebaseAuthException catch (e) {
       final message = authRepo.getAuthErrorMessage(e.code);
+      log("🔴 FirebaseAuthException: ${e.code} => $message");
       showSnackbar("Login Error", message);
       emit(state.copyWith(isloading: false, loginState: LoginState.Failed));
-    } catch (e) {
+    } catch (e, st) {
+      log("🔴 Unexpected error in _onloginwithgoogle: $e");
+      log("Stacktrace: $st");
       showSnackbar("Login Error", e.toString());
-      print(e);
       emit(state.copyWith(isloading: false, loginState: LoginState.Failed));
     }
   }
 
-  Future<void> _onlogout(
-      Logout event,
-      Emitter<AuthState> emit,
-      ) async {
+  Future<void> _onlogout(Logout event, Emitter<AuthState> emit) async {
     emit(state.copyWith(isloading: true, loginState: LoginState.Loading));
 
     try {
@@ -65,6 +67,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(state.copyWith(isloading: false, loginState: LoginState.Failed));
     }
   }
+
   Future<void> _onLoginWithEmail(
     Loginwithemail event,
     Emitter<AuthState> emit,
