@@ -4,14 +4,17 @@ import 'dart:io';
 import 'package:chat_app/Data/Models/Usermodel/Usermodel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class FirestoreRepo {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   String get _uid => _auth.currentUser!.uid;
+
+  // ---------------------- USERS ----------------------
+
   Future<List<UserModel>> getAllUsers() async {
     try {
       final querySnapshot = await _firestore.collection('Users').get();
@@ -19,17 +22,16 @@ class FirestoreRepo {
           .map((doc) => UserModel.fromMap(doc.data(), doc.id))
           .toList();
     } catch (e) {
-      print('Error getting all users: $e');
+      log('Error getting all users: $e');
       rethrow;
     }
   }
 
-  // User CRUD
   Future<void> createUser(UserModel user) async {
     try {
       await _firestore.collection('Users').doc(_uid).set(user.toMap());
     } catch (e) {
-      print('Error creating user: $e');
+      log('Error creating user: $e');
       rethrow;
     }
   }
@@ -45,7 +47,7 @@ class FirestoreRepo {
       }
       return null;
     } catch (e) {
-      print('Error getting user: $e');
+      log('Error getting user: $e');
       rethrow;
     }
   }
@@ -65,7 +67,7 @@ class FirestoreRepo {
     try {
       await _firestore.collection('Users').doc(user.uid).update(user.toMap());
     } catch (e) {
-      print('Error updating user: $e');
+      log('Error updating user: $e');
       rethrow;
     }
   }
@@ -74,66 +76,88 @@ class FirestoreRepo {
     try {
       await _firestore.collection('Users').doc(_uid).delete();
     } catch (e) {
-      print('Error deleting user: $e');
+      log('Error deleting user: $e');
       rethrow;
     }
   }
 
+  // ---------------------- SUPABASE STORAGE ----------------------
+
+  /// Uploads a profile picture to Supabase Storage and returns the public URL.
   Future<String?> uploadProfilePicture(String localFilePath) async {
     if (localFilePath.isEmpty) return null;
     final user = _auth.currentUser;
     if (user == null) throw Exception("No user logged in");
 
     try {
-      File file = File(localFilePath);
-      Reference ref = _storage.ref().child('profile_pictures').child(user.uid);
-      UploadTask uploadTask = ref.putFile(file);
-      TaskSnapshot snapshot = await uploadTask;
-      return await snapshot.ref.getDownloadURL();
+      final file = File(localFilePath);
+      final fileExt = localFilePath.split('.').last;
+      final fileName = "${user.uid}_profile.$fileExt";
+
+      // Upload to Supabase bucket
+      final response = await _supabase.storage
+          .from('media')
+          .upload(
+            'profile_pictures/$fileName',
+            file,
+            fileOptions: const FileOptions(upsert: true),
+          );
+
+      if (response.isEmpty) {
+        throw Exception("Upload failed: No response from Supabase");
+      }
+
+      // Get public URL
+      final publicUrl = _supabase.storage
+          .from('media')
+          .getPublicUrl('profile_pictures/$fileName');
+
+      // Update Firestore user doc
+      await _firestore.collection('Users').doc(user.uid).update({
+        'profilePic': publicUrl,
+      });
+
+      log("✅ Uploaded to Supabase: $publicUrl");
+      return publicUrl;
     } catch (e) {
-      log('Error uploading profile picture: $e');
+      log('❌ Error uploading profile picture: $e');
       rethrow;
     }
   }
 
+  /// Gets the current user's profile picture URL (from Firestore).
   Future<String?> getProfilePictureUrl() async {
-    final User = _auth.currentUser;
-    if (User == null) return null;
+    final user = _auth.currentUser;
+    if (user == null) return null;
     final docSnapshot = await _firestore
         .collection('Users')
-        .doc(User.uid)
+        .doc(user.uid)
         .get();
     if (docSnapshot.exists) {
-      final data = docSnapshot.data();
-      return data?['profilePic'] as String?;
+      return docSnapshot.data()?['profilePic'] as String?;
     }
     return null;
   }
 
+  /// Deletes profile picture from Supabase + clears Firestore field.
   Future<void> deleteProfilePicture() async {
     try {
-      // Create a reference to the file to delete
-      Reference ref = _storage.ref().child('profile_pictures').child(_uid);
+      final user = _auth.currentUser;
+      if (user == null) return;
 
-      // Delete the file
-      await ref.delete();
+      final filePath = 'profile_pictures/${user.uid}_profile.jpg';
+      await _supabase.storage.from('media').remove([filePath]);
+      await _firestore.collection('Users').doc(user.uid).update({
+        'profilePic': '',
+      });
 
-      // Update the user's profilePic URL in Firestore to be empty
-      await _firestore.collection('Users').doc(_uid).update({'profilePic': ''});
+      log("🗑️ Deleted profile picture successfully");
     } catch (e) {
-      // It's possible the file doesn't exist, so we can ignore that error.
-      if (e is FirebaseException && e.code == 'object-not-found') {
-        print('Profile picture not found, no need to delete.');
-        // Still update firestore
-        await _firestore.collection('Users').doc(_uid).update({
-          'profilePic': '',
-        });
-      } else {
-        print('Error deleting profile picture: $e');
-        rethrow;
-      }
+      log('⚠️ Error deleting profile picture: $e');
     }
   }
+
+  // ---------------------- ERRORS ----------------------
 
   String getErrorMessage(e) {
     if (e is FirebaseException) {
@@ -153,7 +177,7 @@ class FirestoreRepo {
         case 'weak-password':
           return 'The password is too weak.';
         default:
-          return 'An unknown error occurred.';
+          return 'An unknown Firebase error occurred.';
       }
     }
     return 'An unknown error occurred.';
